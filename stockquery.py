@@ -1,8 +1,8 @@
 # coding: utf-8
 import hashlib
 import os
-import sqlite3
 import datetime
+import urllib.parse
 import psycopg2
 from flask import Flask, render_template, request, g, session, redirect, url_for
 from utils import get_hs_stock
@@ -20,8 +20,25 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 def connect_db():
     """Connects to the specific database."""
-    conn = psycopg2.connect(dbname='stockquery', user='postgres',
-                          password='123456', host='127.0.0.1', port='5432')
+    urllib.parse.uses_netloc.append("postgres")
+    url = urllib.parse.urlparse(os.environ.get("DATABASE_URL"))
+
+    if url:
+        conn = psycopg2.connect(
+            database=url.path[1:],
+            user=url.username,
+            password=url.password,
+            host=url.hostname,
+            port=url.port
+        )
+    else:
+        conn = psycopg2.connect(
+            dbname='stockquery',
+            user='postgres',
+            password='123456',
+            host='127.0.0.1',
+            port='5432'
+        )
     return conn
 
 # print(connect_db())
