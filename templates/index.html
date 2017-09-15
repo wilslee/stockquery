@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello, world</title>
+    <style>
+        a {
+            color: #000000;
+            text-decoration: none;
+        }
+        .stock-input{
+            display: block;
+            width: 60%;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .btn{
+            border: 1px #cccccc solid;
+            margin: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #efefef;
+        }
+        .btn-query{
+            background-color: #a05cde;
+        }
+        .btn-history{
+            background-color: #65f169;
+        }
+        .btn-help{
+            background-color: #1ac7d0;
+        }
+        .result{
+             margin: 20px;
+             font-size: 18px;
+             color: #333333;
+        }
+        .header{
+             text-align: right;
+             padding: 10px 20px;
+        }
+        .header a {
+             color: #2969ea;
+        }
+    </style>
+</head>
+<body>
+  <div class="header">
+      {% if session.login %}
+          <span>{{ session.user[1] }}</span>
+          |
+          <a href="{{ url_for('logout') }}">退出</a>
+      {% else %}
+          <a href="{{ url_for('login') }}">登录</a>
+          |
+          <a href="{{ url_for('register') }}">注册</a>
+      {% endif %}
+  </div>
+<div style="text-align: center;">
+    <h1>股票通--查询沪深股市的股票价格</h1>
+    <form action="/">
+        <input class="stock-input" name="stock_code" value="{{ stock_code }}"
+        placeholder="请输入您要查询的股票代码，sh开头表示沪股，sz开头表示深股"/>
+
+        <input class="btn btn-query" type="submit" value="查询" ／>
+        <a class="btn btn-history" href="/history/">查询历史</a>
+        <a class="btn btn-help" href="/help/">查询帮助</a>
+    </form>
+
+    <div class="result">
+      {% if query_result %}{{ query_result }}
+      {% elif history %}
+        {% for his in history %}
+          <p>{{ his[4] }} 查询股票代码({{ his[2] }})的结果是：
+             {{ his[3] }}
+          </p>
+        {% endfor %}
+      {% elif history == '' and not session.login %}
+          <p> 必须登录才能记录查询历史 </p>
+      {% elif help %}{{ help|safe }}
+      {% else %}{% endif %}
+    </div>
+</div>
+</body>
+</html>

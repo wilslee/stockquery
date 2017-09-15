@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录--股票通</title>
+    <style>
+        a {
+            color: #000000;
+            text-decoration: none;
+        }
+        .btn{
+            border: 1px #cccccc solid;
+            margin: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #efefef;
+        }
+        .btn-login{
+            background-color: #5b3ade;
+            color: #ffffff;
+        }
+        .error{
+             margin: 20px;
+             font-size: 18px;
+             color: red;
+        }
+        .login-form {
+             width: 350px;
+             margin: 0 auto;
+        }
+        .login-form input{
+             width: 85%;
+             padding: 10px;
+             margin: 10px 0;
+             font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<div style="text-align: center;">
+    <h1>股票通--用户登录</h1>
+    <form class="login-form" action="/login/" method="post">
+        <input name="username" placeholder="请输入用户名" value="{{ username }}"/>
+        <input type="password" name="password" placeholder="请输入密码"/>
+
+        <input class="btn btn-login" type="submit" value="登录" ／>
+    </form>
+
+    <div class="error">
+        {% if error %}<p>{{ error }} </p>{% endif %}
+    </div>
+</div>
+</body>
+</html>
