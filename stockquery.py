@@ -167,7 +167,7 @@ def add_wxuser_history(openid, stock_code, result):
 
 def query_all_wxuser_history(openid):
     db = get_db()
-    sql_script = """SELECT * FROM wxuser_history
+    sql_script = """SELECT openid, stock_code, result, query_time FROM wxuser_history
                     WHERE openid='{}' ORDER BY query_time DESC
                  """.format(openid)
     cur = db.cursor()
