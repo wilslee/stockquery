@@ -168,7 +168,7 @@ def add_wxuser_history(openid, stock_code, result):
 def query_all_wxuser_history(openid):
     db = get_db()
     sql_script = """SELECT * FROM wxuser_history
-                    WHERE openid={} ORDER BY query_time DESC
+                    WHERE openid='{}' ORDER BY query_time DESC
                  """.format(openid)
     cur = db.cursor()
     cur.execute(sql_script)
@@ -309,7 +309,10 @@ def wechat():
                 '{} 查询 {}: {}\n'.format(item[3], item[1], item[2])
                 for item in histories
             ])
-            reply = create_reply(histories_str, msg)
+            if histories_str:
+                reply = create_reply(histories_str, msg)
+            else:
+                reply = create_reply('未有查询记录', msg)
         # 帮助
         elif msg.content in ['帮助']:
             reply = create_reply(_help, msg)
