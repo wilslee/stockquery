@@ -4,8 +4,21 @@ import os
 import datetime
 import urllib.parse
 import psycopg2
-from flask import Flask, render_template, request, g, session, redirect, url_for
+from flask import (Flask, render_template, request, g, session,
+redirect, url_for, abort)
+from wechatpy import parse_message, create_reply
+from wechatpy.utils import check_signature
+from wechatpy.exceptions import (
+    InvalidSignatureException,
+    InvalidAppIdException,
+)
 from utils import get_hs_stock
+
+
+TOKEN = os.getenv('WECHAT_TOKEN', 'stockquery')
+AES_KEY = os.getenv('WECHAT_AES_KEY', '')
+APPID = os.getenv('WECHAT_APPID', '')
+
 
 app = Flask(__name__)
 app.config.from_object(__name__) # load config from this file , flaskr.py
@@ -23,7 +36,7 @@ def connect_db():
     urllib.parse.uses_netloc.append("postgres")
     url = urllib.parse.urlparse(os.environ.get("DATABASE_URL"))
 
-    if url:
+    if os.environ.get("DATABASE_URL"):
         conn = psycopg2.connect(
             database=url.path[1:],
             user=url.username,
@@ -243,3 +256,27 @@ def help():
         <p>3. 点击查询帮助，查看帮助文档 </p>
     """
     return render_template('index.html', help=help_str)
+
+
+@app.route('/wx/', methods=['GET', 'POST'])
+def wechat():
+    signature = request.args.get('signature', '')
+    timestamp = request.args.get('timestamp', '')
+    nonce = request.args.get('nonce', '')
+    encrypt_type = request.args.get('encrypt_type', 'raw')
+    msg_signature = request.args.get('msg_signature', '')
+    try:
+        check_signature(TOKEN, signature, timestamp, nonce)
+    except InvalidSignatureException:
+        abort(403)
+    if request.method == 'GET':
+        echo_str = request.args.get('echostr', '')
+        return echo_str
+
+    # plaintext mode
+    msg = parse_message(request.data)
+    if msg.type == 'text':
+        reply = create_reply(msg.content, msg)
+    else:
+        reply = create_reply('对不起，无法识别!!', msg)
+    return reply.render()
