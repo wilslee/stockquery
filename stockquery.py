@@ -154,6 +154,28 @@ def query_all_history(user_id):
     return histories
 
 
+def add_wxuser_history(openid, stock_code, result):
+    db = get_db()
+    now = datetime.datetime.now()
+    sql_script = """INSERT INTO wxuser_history (openid, stock_code, result, query_time)
+                    VALUES ('{}', '{}', '{}', '{}')
+                 """.format(openid, stock_code, result, now)
+    cur = db.cursor()
+    cur.execute(sql_script)
+    db.commit()
+
+
+def query_all_wxuser_history(openid):
+    db = get_db()
+    sql_script = """SELECT * FROM wxuser_history
+                    WHERE openid={} ORDER BY query_time DESC
+                 """.format(openid)
+    cur = db.cursor()
+    cur.execute(sql_script)
+    histories = cur.fetchall()
+    return histories
+
+
 @app.route('/register/', methods=['GET', 'POST'])
 def register():
     """ 用户注册功能 """
@@ -273,10 +295,29 @@ def wechat():
         echo_str = request.args.get('echostr', '')
         return echo_str
 
+    _help = """1. 查询沪深股市股票价格，sh 开头表示沪股，sz 开头表示深股\n2. 输入'历史'，查看历史查询记录\n3. 输入：'帮助'，查看帮助文档\n"""
+
     # plaintext mode
     msg = parse_message(request.data)
     if msg.type == 'text':
-        reply = create_reply(msg.content, msg)
+        # 微信用户的 openid
+        openid = msg.source
+        # 历史
+        if msg.content in ['历史']:
+            histories = query_all_wxuser_history(openid)
+            histories_str = "".join([
+                '{} 查询 {}: {}\n'.format(item[3], item[1], item[2])
+                for item in histories
+            ])
+            reply = create_reply(histories_str, msg)
+        # 帮助
+        elif msg.content in ['帮助']:
+            reply = create_reply(_help, msg)
+        # 股价查询
+        else:
+            result = get_hs_stock(msg.content)
+            add_wxuser_history(openid, msg.content, result)
+            reply = create_reply(result, msg)
     else:
         reply = create_reply('对不起，无法识别!!', msg)
     return reply.render()

@@ -13,3 +13,12 @@ create table history (
   result varchar(256) not null,
   query_time timestamp
 );
+
+drop table if exists wxuser_history;
+create table wxuser_history (
+  id serial primary key,
+  openid integer not null,
+  stock_code varchar(64) not null,
+  result varchar(256) not null,
+  query_time timestamp
+);
