@@ -6,5 +6,5 @@ pipenv==6.2.5
 psycopg2==2.7.3.1
 pycrypto==2.6.1
 requests==2.18.1
-urllib3==1.21.1
+urllib3==1.26.5
 wechatpy==1.5.1
